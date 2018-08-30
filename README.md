@@ -9,5 +9,5 @@ install.packages("devtools")
 library(devtools)
 devtools::install_github("ajmolstad/MCMVR")
 ```
-# Citations and Issues 
+# Citation
 Please contact `amolstad@fredhutch.org` for citation directions. 
