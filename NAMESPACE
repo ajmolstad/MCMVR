@@ -1,0 +1,11 @@
+useDynLib(MCMVR, .registration = TRUE)
+
+export(MCMVR.cv)
+export(MCMVR.predict)
+export(MCMVR.coef)
+
+
+import(Rcpp)
+import(Matrix)
+importFrom("stats", "sd", "var")
+

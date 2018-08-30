@@ -1,0 +1,15 @@
+Package: MCMVR
+Type: Package
+Title: L1-penalized multivariate response linear regression under an
+        explicit mean-covariance parameterization.
+Version: 1.0.0
+Author: Aaron J. Molstad <amolstad@fredhutch.org>
+Maintainer: Aaron J. Molstad <amolstad@fredhutch.org>
+Description: Implementation of the L1-penalized non-convex weighted residual sum of squares estimator proposed by Molstad, A. J., Weng, G., Doss, C. R.,  and Rothman, A. J. (2018). This method is applicable in scenarios where the conditional correlation between two response variables is proportional to the cosine of the angles of their respect regression coefficient vectors. This parameterization occurs under a multivariate response error-in-variables linear regression model. 
+License: GPL (>= 2)
+URL: ajmolstad@github.io
+LazyData: TRUE
+Imports: Rcpp (>= 0.12.1), Matrix
+LinkingTo: Rcpp, RcppArmadillo
+NeedsCompilation: yes
+Packaged: 2018-08-29 19:33:45 UTC; aaronmolstad
