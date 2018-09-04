@@ -1,5 +1,5 @@
 # MCMVR
-An R package implementing the method proposed in "An explicit mean-covariance parameterization for multivariate response linear regression". 
+An R package implementing the method proposed in [An explicit mean-covariance parameterization for multivariate response linear regression](https://arxiv.org/abs/1808.10558) by Molstad, Weng, Doss, and Rothman. 
 
 
 # Installation
