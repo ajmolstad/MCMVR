@@ -3,7 +3,7 @@ An R package implementing the method proposed in [An explicit mean-covariance pa
 
 
 # Installation
-MCMVR can be downloaded directly into R through the the `devtools` package:
+MCMVR can be loaded directly into R through the the `devtools` package:
 ```{r}
 install.packages("devtools")
 library(devtools)
