@@ -1,7 +1,7 @@
 Package: MCMVR
 Type: Package
-Title: L1-penalized multivariate response linear regression under an
-        explicit mean-covariance parameterization.
+Title: L1-penalized Multivariate Response Linear Regression under an
+        Explicit Mean-Covariance Parameterization
 Version: 1.0.0
 Author: Aaron J. Molstad <amolstad@fredhutch.org>
 Maintainer: Aaron J. Molstad <amolstad@fredhutch.org>
