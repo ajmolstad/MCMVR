@@ -132,7 +132,7 @@
 
 		# ---- select tuning parameters for lambda 
 		lambda.vec <- rep(0, length=nlambda)
-		lambda.max <-2*dim(z)[1]^(-1)*max(abs(crossprod(z,y))) + 1e-6
+		lambda.max <-1.01*dim(z)[1]^(-1)*max(abs(crossprod(z,y))) + 1e-6
 		lambda.min <- delta*lambda.max
 		for(kk in 1:nlambda){
 			lambda.vec[kk] <- lambda.max^((nlambda-kk)/(nlambda-1))*lambda.min^((kk-1)/(nlambda-1))
