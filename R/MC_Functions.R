@@ -10,10 +10,10 @@
 	Acc.Prox.L1 <- function(z, y, ztz, zty, beta.old, tau, lambda, L = NULL, weight, inner.quiet = TRUE, epsilon.beta = 1e-8, max.iter.inner = 2e4){
 	    
 	    # -- set step size if NULL
-		L0 <- 1/tau
-		L <- 1/tau
+	    L0 <- 1/tau
+	    L <- 1/tau
 
-		# -- set backtrack parameter and compute initial obj.func val
+	    # -- set backtrack parameter and compute initial obj.func val
 	    gam <- 2
 	    old <- MCnegloglikCpp(beta.old, z, y, tau)
 	    oldpen <- old + lambda*sum(abs(weight*beta.old))
@@ -143,17 +143,17 @@
 		sparsity.mat <- matrix(0, length(lambda.vec), length(tau.vec))
 
 		for(jj in 1:length(tau.vec)){
+			
 			beta.old <- matrix(0, nrow=p, ncol=q)
-
 			for(kk in 1:length(lambda.vec)){
 		   		temp <- Acc.Prox.L1(z, y, ztz, zty, beta.old, tau.vec[jj], lambda.vec[kk]/tau.vec[jj], 
 		   			L = NULL, weight = weight, inner.quiet = inner.quiet, epsilon.beta = tol, max.iter.inner = 1e4)
 		   		beta.old <- temp$beta
 				beta.full[(p*q*(jj-1)+1):(p*q*jj),kk] <- c(beta.old)
-		     	sparsity.mat[kk,jj] <- sum(beta.old!=0)
-		     	if(!quiet){
-		     		cat(jj, kk, ": non-zero = ", sum(beta.old!=0), "\n")
-		     	}
+		     		sparsity.mat[kk,jj] <- sum(beta.old!=0)
+		     		if(!quiet){
+		     			cat(jj, kk, ": non-zero = ", sum(beta.old!=0), "\n")
+		     		}
 		  	}
 		}
 		
