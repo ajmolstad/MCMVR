@@ -265,7 +265,7 @@
 			beta.mat <- matrix(beta.vec, byrow=FALSE, nrow=p, ncol=q)
 		} else {
 			beta.vec <- fit$beta[(p*q*(tau.ind-1)+1):(p*q*tau.ind),lam.ind]
-			beta.mat <- tcrossprod(fit$Z.sd, rep(1, q))*matrix(beta.vec, byrow=FALSE, nrow=p, ncol=q)*tcrossprod(rep(1, p), fit$Y.sd)
+			beta.mat <- tcrossprod(1/fit$Z.sd, rep(1, q))*matrix(beta.vec, byrow=FALSE, nrow=p, ncol=q)*tcrossprod(rep(1, p), fit$Y.sd)
 		}
 		# --- get intercept 	
 		B0 <- fit$Y.offset - crossprod(beta.mat, fit$Z.offset)
@@ -298,7 +298,7 @@
 			beta.mat <- matrix(beta.vec, byrow=FALSE, nrow=p, ncol=q)
 		} else {
 			beta.vec <- fit$beta[(p*q*(tau.ind-1)+1):(p*q*tau.ind),lam.ind]
-			beta.mat <- tcrossprod(fit$Z.sd, rep(1, q))*matrix(beta.vec, byrow=FALSE, nrow=p, ncol=q)*tcrossprod(rep(1, p), fit$Y.sd)
+			beta.mat <- tcrossprod(1/fit$Z.sd, rep(1, q))*matrix(beta.vec, byrow=FALSE, nrow=p, ncol=q)*tcrossprod(rep(1, p), fit$Y.sd)
 		}
 		# --- get intercept 	
 		B0 <- fit$Y.offset - crossprod(beta.mat, fit$Z.offset)
