@@ -2,18 +2,29 @@
 title: "MCMVR Example"
 author: "Aaron J. Molstad (amolstad@ufl.edu)"
 date: "7/18/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-```{r setup, include=FALSE, }
+```{r setup, include=FALSE}
 library(Rcpp)
 library(RcppArmadillo)
-source("~/Dropbox/GitHub/MCMVRDev/R/MCMVR.R")
-sourceCpp("~/Dropbox/GitHub/MCMVRDev/src/MCnegloglikCpp.cpp")
+source("~/Dropbox/GitHub/MCMVR/R/MCMVR.R")
+sourceCpp("~/Dropbox/GitHub/MCMVR/src/MCnegloglikCpp.cpp")
 ```
 
-In this document, we provide a short tutorial on how to use the \texttt{MCMVR} R package. First, we generate data from the ``errors-in-variables'' data generating model described in Section 3.1 of the article. 
-```{r generate data, cache=TRUE}
+
+In this document, we provide a short tutorial on how to use the \texttt{MCMVR} R package. We download this package from GitHub. 
+```{r githubDL, eval=FALSE}
+install.packages("devtools")
+library(devtools)
+devtools::install_github("ajmolstad/MCMVR")
+library(MCMVR)
+```
+
+First, we generate data from the ``errors-in-variables'' data generating model described in Section 3.1 of the article. 
+```{r generate data}
 set.seed(1)
 p <- 50
 q <- 10
@@ -29,11 +40,11 @@ Znew <- matrix(rnorm(n*p), nrow=n, ncol=p)
 Xnew <- Znew + matrix(rnorm(n*p, sd=sqrt(0.5)), nrow=n)
 Ynew <- tcrossprod(Znew, t(beta)) + matrix(rnorm(n*q, sd=1), nrow=n)
 ```
-We fit the model using the cross-validation function. There are a key arguments. The first is \texttt{tau.vec}, where one must specify a vector of candidate tuning parameters $\tau$ over which to fit the model: 
+We fit the model using the cross-validation function. There are a number of key arguments: the first is \texttt{tau.vec}, where a user must specify a vector of candidate tuning parameters $\tau$ over which to fit the model: 
 $$ \arg \min_{\beta} {\rm tr}\left\{n^{-1}(Y - X\beta) (\beta'\beta + \tau I_q)^{-1}(Y - X\beta)' \right\} + \frac{\lambda}{\tau}{\rm Pen}(\beta).$$
 Another important argument is \texttt{nfolds}. If set to NULL, cross-validation is not performed, the model is fit to the complete data without cross-validation. 
-Finally, we must also decide which penalty to use. The current options are \texttt{penalty="L1"} and \texttt{penalty="NN"} which set ${\rm Pen}(\beta) = \sum_{j,k}|\beta_{j,k}|$ and ${\rm Pen}(\beta) = \sum_{j=1}^{\min (p,q)} \varphi_j(\beta)$ where $\varphi_j(\beta)$ is the $j$th largest singular value of $\beta$. Note that one only needs to input the number of candidate $\lambda$, \texttt{nlambda}, and the ratio of max to min lambda \texttt{delta}. 
-```{r fit model, cache=TRUE}
+Finally, a user must also decide which penalty to use. The current options are \texttt{penalty="L1"} and \texttt{penalty="NN"} which set ${\rm Pen}(\beta) = \sum_{j,k}|\beta_{j,k}|$ and ${\rm Pen}(\beta) = \sum_{j=1}^{\min (p,q)} \varphi_j(\beta)$, respectively, where $\varphi_j(\beta)$ is the $j$th largest singular value of $\beta$. Note that one only needs to input the number of candidate $\lambda$, \texttt{nlambda}, and the ratio of max to min lambda \texttt{delta}. 
+```{r fit model}
 # ---------------------------------------------------
 # Perform 5-fold CV for a grid of tuning parameters 
 # ---------------------------------------------------
@@ -73,8 +84,8 @@ abline(0,1, lty=2)
 betas <- MCMVR.coef(fit, tau = fit$tau.vec[1], lambda=fit$lambda.vec[12])$beta
 
 par(mfrow=c(1,2))
-image(betas!=0, col=grey(100:0/100), main=expression(paste("Nonzero entries of ", tilde(beta), "\n")))
-image(beta!=0, col=grey(100:0/100), main=expression(paste("Nonzero entries of ", beta["*"], "\n")))
+image(betas!=0, col=grey(100:0/100), main=paste("Nonzero entries of estimate"))
+image(beta!=0, col=grey(100:0/100), main=paste("Nonzero entries of truth"))
 ```
 
 
@@ -83,8 +94,8 @@ We now also fit the model for the nuclear norm penalized version. Note that it i
 # ---------------------------------------------------
 # Perform 5-fold CV for a grid of tuning parameters 
 # ---------------------------------------------------
-tau.vec <- 10^seq(3, 0, by=-.5)
-fit <- MCMVR.cv(X = X, Y = Y, tau.vec = tau.vec, nlambda = 50, nfolds = 5, 
+tau.vec <- 10^seq(3, 0, by=-1)
+fit <- MCMVR.cv(X = X, Y = Y, tau.vec = tau.vec, nlambda = 10, nfolds = 5, 
   delta = .01, tol = 1e-10, quiet = FALSE, inner.quiet= TRUE, penalty="NN")
 str(fit)
 levelplot(apply(fit$err.pred, c(1,2), mean), col.regions=grey(100:0/100), xlab=expression(lambda), ylab=expression(tau), aspect="fill")
