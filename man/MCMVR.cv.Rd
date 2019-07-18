@@ -3,42 +3,37 @@
 \name{MCMVR.cv}
 \alias{MCMVR.cv}
 \title{MCMVR.cv}
-\description{A function to perform cross-validation  and model fitting. Output is a fitted model: an object of type \code{MC_MVR}. }\usage{
-MCMVR.cv(Z, Y, tau.vec, nlambda, weight = NULL, standardize = FALSE, nfolds = NULL, 
-	delta = .01, tol=1e-8, quiet = TRUE, inner.quiet=TRUE)
+\description{A function to perform cross-validation and model fitting. }\usage{
+MCMVR.cv(X, Y, tau.vec, nlambda, nfolds = NULL, 
+  delta = .01, tol = 1e-8, quiet = TRUE, inner.quiet= TRUE, penalty="L1")
 }
 
 \arguments{
-\item{Z}{An \eqn{n \times p} matrix of predictors.}
+\item{X}{An \eqn{n \times p} matrix of predictors.}
 \item{Y}{An \eqn{n \times q} matrix of response variables.}
 \item{tau.vec}{A vector of candidate tuning parameters \eqn{\tau}. }
 \item{nlambda}{The number of candidate tuning parameters \eqn{\lambda} to be used for model fitting and cross-validation. }
-\item{weight}{A \eqn{p \times q} weight matrix used in the L1 penalty.}
-\item{standardize}{When \code{TRUE}, standardizes both predictors and responses to have unit standard deviation for model fitting. Default is \code{FALSE}}
 \item{nfolds}{When \code{NULL}, does not perform cross-validation but fits the model for all combinations of \eqn{\tau} and \eqn{\lambda}}.
 \item{delta}{Scalar less than one which indicates the ratio between largest and smallest candidate \eqn{\lambda}. Default is .01. }.
 \item{tol}{Convergence tolerance for inner accelerate proximal gradient descent algorithm.}
 \item{quiet}{If \code{TRUE}, prints progress. }.
-\item{inner.quiet}{If \code{TRUE}, prints objective function values for inner functions. }}
+\item{inner.quiet}{If \code{TRUE}, prints objective function values for inner functions. Should be rarely used unless to help determine an appropriate \code{tol}. }
+\item{penalty}{A character, either \code{"L1"} or \code{"NN"} for the \eqn{\ell_1}-penalized version of our method or the nuclear norm penalty version, respectively.}}
 
 \value{
+A fitted model and cross-validation diagnostics. To extract regression coefficients for certain values of \eqn{\tau} and \eqn{\lambda}, use \code{MCMVR.coef}. To perform prediction, use \code{MCMVR.pred}. 
 
-An object of class \code{MC_MVR}, which can plotted using \code{MC_MVR.plot}, and used to predict outcome values for new covariates using \code{MC_MVR.predict}. To extract regression coefficients for certain values of \eqn{\tau} and \eqn{\lambda}, use \code{MC_MVR.coef}.
+\item{\code{beta}}{A matrix of dimension \eqn{pq}\code{length(tau.vec)}\eqn{ \times }\code{nlambda}. To extract coefficients for a specific pair of tuning parameters, use \code{MCMVR.coef}.}
 
-
-\item{\code{beta}}{A sparse matrix of dimension \eqn{pq}\code{length(tau.vec)}\eqn{ \times }\code{nlambda}. To extract coefficients for a specific pair of tuning parameters, use \code{MC_MVR.coef}.}
-
-\item{sparsity.mat}{A matrix of dimension \code{nlambda} \eqn{ \times } \code{length(tau.vec)} which provides the number of nonzero elements in \eqn{\beta} for each tuning parameter pair. }
+\item{sparsity.mat}{A matrix of dimension \code{nlambda} \eqn{ \times } \code{length(tau.vec)} which provides the number of nonzero elements in \eqn{\beta} for each tuning parameter pair or the nuclear norm of the regression coefficient matrix. }
 
 \item{\code{err.pred}}{An array of dimension \code{nlambda} \eqn{ \times } \code{length(tau.vec)} \eqn{ \times } \code{nfold} giving the mean cross-validation error for each fold. }
+
+\item{\code{err.wpred}}{An array of dimension \code{nlambda} \eqn{ \times } \code{length(tau.vec)} \eqn{ \times } \code{nfold} giving the mean cross-validation weighted error for each fold (i.e., responses transformed to same scale). }
 
 \item{\code{Y.offset}}{A \eqn{q}-dimensional vector giving the sample mean for the response in the training data.}
 
 \item{\code{Z.offset}}{A \eqn{p}-dimensional vector giving the sample mean for the predictor in the training data.}
-
-\item{\code{Y.sd}}{A \eqn{q}-dimensional vector giving the sample standard deviation for the response in the training data.}
-
-\item{\code{Z.sd}}{A \eqn{p}-dimensional vector giving the sample standard deviation for the predictor in the training data.}
 
 \item{\code{lambda.vec}}{A \code{nlambda}-dimensional vector giving the values of \eqn{\lambda} at which \eqn{\beta} were computed.}
 
@@ -46,48 +41,7 @@ An object of class \code{MC_MVR}, which can plotted using \code{MC_MVR.plot}, an
 
 \item{\code{tau.min}}{The value of the tuning parameter \eqn{\tau} which minimizes prediction error in cross-validation. }
 
-\item{\code{lam.min}}{The value of the tuning parameter \eqn{\lambda} which minimizes prediction error in cross-validation. }
-
-\item{\code{standardize}:}{The same as the input \code{standardize}.}
-
-}
-
-\examples{
-# ------------------------------------
-# Generate data 
-# ------------------------------------
-set.seed(1)
-p <- 50
-q <- 10
-n <- 100
-
-beta <- matrix(rnorm(p*q)*sample(c(0,1), p*q, prob = c(.9, .1), replace=TRUE), nrow=p, ncol=q)
-
-SigmaX <- matrix(.5, nrow=p, ncol=p)
-diag(SigmaX) <- 1
-eo <- eigen(SigmaX)
-SigmaXsqrt <- eo$vec
-X <- matrix(rnorm(n*p), nrow=n, ncol=p)
-
-Y <- tcrossprod(X, t(beta)) + matrix(rnorm(n*q, sd=1), nrow=n)
-Z <- X + matrix(rnorm(n*p, sd=sqrt(0.25)), nrow=n)
-
-Xnew <- matrix(rnorm(n*p), nrow=n, ncol=p)
-Znew <- Xnew + matrix(rnorm(n*p, sd=sqrt(0.25)), nrow=n)
-
-# ------------------------------------
-# Fit model for a grid of parameters 
-# ------------------------------------
-tau.vec <- 10^seq(2, 0, by=-1)
-fit <- MCMVR.cv(Z, Y, tau.vec = tau.vec, nlambda = 40, tol = 1e-6, delta = 0.05, quiet=TRUE,
-	standardize = TRUE, nfolds = 3)
-
-# -- get coefs from model which minimized CV error
-betas <- MCMVR.coef(fit)
-
-# -- make predictions for Znew
-preds <- MCMVR.predict(Znew, fit)
-
+\item{\code{lam.min}}{The value of the tuning parameter \eqn{\lambda} which minimizes prediction error in cross-validation.}
 }
 
 

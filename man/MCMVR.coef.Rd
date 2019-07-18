@@ -3,13 +3,13 @@
 \name{MCMVR.coef}
 \alias{MCMVR.coef}
 \title{MCMVR.coef}
-\description{A function to extract the estimated regression coefficient matrix and intercept from an object of type \code{MC_MVR}, a model fit using \code{MCMVR.cv}.}
+\description{A function to extract the estimated regression coefficient matrix and intercept from an fitted model from \code{MCMVR.cv}.}
 \usage{
 MCMVR.coef(fit, lambda = NULL, tau = NULL)
 }
 
 \arguments{
-\item{fit}{A fitted model; an object of type \code{MC_MVR} obtained from \code{MC_MVR.cv}.}
+\item{fit}{A fitted model from \code{MCMVR.cv}.}
 \item{lambda}{The value of \eqn{\lambda} used to estimate \eqn{\beta}. If \code{NULL} and \code{fit} was obtained using \code{nfolds} non-\code{NULL}, will use tuning parameters which minimized prediction error in cross-validation.  }
 \item{tau}{The value of \eqn{\tau} used to estimate \eqn{\beta}. If \code{NULL} and \code{fit} was obtained using \code{nfolds} non-\code{NULL}, will use tuning parameters which minimized prediction error in cross-validation. }
 }
@@ -19,43 +19,4 @@ MCMVR.coef(fit, lambda = NULL, tau = NULL)
 \item{\code{beta0}:}{The estimated \eqn{q}-dimensional intercept vector.  }
 \item{\code{beta}: }{The estimated \eqn{p \times q} matrix of regression coefficients. }
 }
-
-\examples{
-# ------------------------------------
-# Generate data 
-# ------------------------------------
-set.seed(1)
-p <- 50
-q <- 10
-n <- 100
-
-beta <- matrix(rnorm(p*q)*sample(c(0,1), p*q, prob = c(.9, .1), replace=TRUE), nrow=p, ncol=q)
-
-SigmaX <- matrix(.5, nrow=p, ncol=p)
-diag(SigmaX) <- 1
-eo <- eigen(SigmaX)
-SigmaXsqrt <- eo$vec
-X <- matrix(rnorm(n*p), nrow=n, ncol=p)
-
-Y <- tcrossprod(X, t(beta)) + matrix(rnorm(n*q, sd=1), nrow=n)
-Z <- X + matrix(rnorm(n*p, sd=sqrt(0.25)), nrow=n)
-
-Xnew <- matrix(rnorm(n*p), nrow=n, ncol=p)
-Znew <- Xnew + matrix(rnorm(n*p, sd=sqrt(0.25)), nrow=n)
-
-# ------------------------------------
-# Fit model for a grid of parameters 
-# ------------------------------------
-tau.vec <- 10^seq(2, 0, by=-1)
-fit <- MCMVR.cv(Z, Y, tau.vec = tau.vec, nlambda = 40, tol = 1e-6, delta = 0.05, quiet=TRUE,
-	standardize = TRUE, nfolds = 3)
-
-# -- get coefs from model which minimized CV error
-betas <- MCMVR.coef(fit)
-
-# -- make predictions for Znew
-preds <- MCMVR.predict(Znew, fit)
-
-}
-
 

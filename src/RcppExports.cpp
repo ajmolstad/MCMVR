@@ -7,22 +7,23 @@
 using namespace Rcpp;
 
 // MCnegloglikCpp
-double MCnegloglikCpp(arma::mat beta, arma::mat z, arma::mat y, double tau);
-RcppExport SEXP _MCMVR_MCnegloglikCpp(SEXP betaSEXP, SEXP zSEXP, SEXP ySEXP, SEXP tauSEXP) {
+double MCnegloglikCpp(arma::mat beta, arma::mat x, arma::mat y, double tau, arma::mat d);
+RcppExport SEXP _MCMVR_MCnegloglikCpp(SEXP betaSEXP, SEXP xSEXP, SEXP ySEXP, SEXP tauSEXP, SEXP dSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type z(zSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP);
     Rcpp::traits::input_parameter< double >::type tau(tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(MCnegloglikCpp(beta, z, y, tau));
+    Rcpp::traits::input_parameter< arma::mat >::type d(dSEXP);
+    rcpp_result_gen = Rcpp::wrap(MCnegloglikCpp(beta, x, y, tau, d));
     return rcpp_result_gen;
 END_RCPP
 }
 // MCgradbetaCpp
-arma::mat MCgradbetaCpp(arma::mat beta, arma::mat x, arma::mat y, arma::mat xtx, arma::mat xty, double tau);
-RcppExport SEXP _MCMVR_MCgradbetaCpp(SEXP betaSEXP, SEXP xSEXP, SEXP ySEXP, SEXP xtxSEXP, SEXP xtySEXP, SEXP tauSEXP) {
+arma::mat MCgradbetaCpp(arma::mat beta, arma::mat x, arma::mat y, arma::mat xtx, arma::mat xty, double tau, arma::mat d);
+RcppExport SEXP _MCMVR_MCgradbetaCpp(SEXP betaSEXP, SEXP xSEXP, SEXP ySEXP, SEXP xtxSEXP, SEXP xtySEXP, SEXP tauSEXP, SEXP dSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,17 +33,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type xtx(xtxSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type xty(xtySEXP);
     Rcpp::traits::input_parameter< double >::type tau(tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(MCgradbetaCpp(beta, x, y, xtx, xty, tau));
+    Rcpp::traits::input_parameter< arma::mat >::type d(dSEXP);
+    rcpp_result_gen = Rcpp::wrap(MCgradbetaCpp(beta, x, y, xtx, xty, tau, d));
     return rcpp_result_gen;
 END_RCPP
 }
 
-RcppExport SEXP _MCMVR_MCgradbetaCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-RcppExport SEXP _MCMVR_MCnegloglikCpp(SEXP, SEXP, SEXP, SEXP);
-
 static const R_CallMethodDef CallEntries[] = {
-    {"_MCMVR_MCnegloglikCpp", (DL_FUNC) &_MCMVR_MCnegloglikCpp, 4},
-    {"_MCMVR_MCgradbetaCpp", (DL_FUNC) &_MCMVR_MCgradbetaCpp, 6},
+    {"_MCMVR_MCnegloglikCpp", (DL_FUNC) &_MCMVR_MCnegloglikCpp, 5},
+    {"_MCMVR_MCgradbetaCpp", (DL_FUNC) &_MCMVR_MCgradbetaCpp, 7},
     {NULL, NULL, 0}
 };
 
