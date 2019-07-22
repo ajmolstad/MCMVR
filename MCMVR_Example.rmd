@@ -40,10 +40,10 @@ Znew <- matrix(rnorm(n*p), nrow=n, ncol=p)
 Xnew <- Znew + matrix(rnorm(n*p, sd=sqrt(0.5)), nrow=n)
 Ynew <- tcrossprod(Znew, t(beta)) + matrix(rnorm(n*q, sd=1), nrow=n)
 ```
-We fit the model using the cross-validation function. There are a number of key arguments: the first is \texttt{tau.vec}, where a user must specify a vector of candidate tuning parameters $\tau$ over which to fit the model: 
+We fit the model using the cross-validation function. There are a number of key arguments: the first is $\texttt{tau.vec}$, where a user must specify a vector of candidate tuning parameters $\tau$ over which to fit the model: 
 $$ \arg \min_{\beta} {\rm tr}\left\{n^{-1}(Y - X\beta) (\beta'\beta + \tau I_q)^{-1}(Y - X\beta)' \right\} + \frac{\lambda}{\tau}{\rm Pen}(\beta).$$
-Another important argument is \texttt{nfolds}. If set to NULL, cross-validation is not performed, the model is fit to the complete data without cross-validation. 
-Finally, a user must also decide which penalty to use. The current options are \texttt{penalty="L1"} and \texttt{penalty="NN"} which set ${\rm Pen}(\beta) = \sum_{j,k}|\beta_{j,k}|$ and ${\rm Pen}(\beta) = \sum_{j=1}^{\min (p,q)} \varphi_j(\beta)$, respectively, where $\varphi_j(\beta)$ is the $j$th largest singular value of $\beta$. Note that one only needs to input the number of candidate $\lambda$, \texttt{nlambda}, and the ratio of max to min lambda \texttt{delta}. 
+Another important argument is $\texttt{nfolds}$. If set to NULL, cross-validation is not performed, the model is fit to the complete data without cross-validation. 
+Finally, a user must also decide which penalty to use. The current options are $\texttt{penalty="L1"}$ and $\texttt{penalty="NN"}$ which set ${\rm Pen}(\beta) = \sum_{j,k}|\beta_{j,k}|$ and ${\rm Pen}(\beta) = \sum_{j=1}^{\min (p,q)} \varphi_j(\beta)$, respectively, where $\varphi_j(\beta)$ is the $j$th largest singular value of $\beta$. Note that one only needs to input the number of candidate $\lambda$, $\texttt{nlambda}$, and the ratio of max to min lambda $\texttt{delta}$. 
 ```{r fit model, tidy=TRUE}
 # ---------------------------------------------------
 # Perform 5-fold CV for a grid of tuning parameters 
@@ -89,13 +89,13 @@ image(beta!=0, col=grey(100:0/100), main=paste("Nonzero entries of truth"))
 ```
 
 
-We now also fit the model for the nuclear norm penalized version. Note that it is sometimes useful to relax the convergence tolerance for this version. We also turn off the \texttt{quiet} option. Note that \texttt{inner.quiet} should only be used for determining an appropriate value of \texttt{tol}. 
+We now also fit the model for the nuclear norm penalized version. Note that it is sometimes useful to relax the convergence tolerance for this version. We also turn off the $\texttt{quiet}$ option. Note that $\texttt{inner.quiet}$ should only be used for determining an appropriate value of $\texttt{tol}$. 
 ```{r generate RR data, tidy=TRUE}
 # ---------------------------------------------------
 # Perform 5-fold CV for a grid of tuning parameters 
 # ---------------------------------------------------
-tau.vec <- 10^seq(3, 0, by=-1)
-fit <- MCMVR.cv(X = X, Y = Y, tau.vec = tau.vec, nlambda = 10, nfolds = 5, 
+tau.vec <- 10^seq(3, 0, by=-.5)
+fit <- MCMVR.cv(X = X, Y = Y, tau.vec = tau.vec, nlambda = 20, nfolds = 5, 
   delta = .01, tol = 1e-10, quiet = FALSE, inner.quiet= TRUE, penalty="NN")
 str(fit)
 levelplot(apply(fit$err.pred, c(1,2), mean), col.regions=grey(100:0/100), xlab=expression(lambda), ylab=expression(tau), aspect="fill")
