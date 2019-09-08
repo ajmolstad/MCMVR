@@ -534,7 +534,7 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, nfolds = NULL,
                  "tau.min" = tau.min,
                  "lam.min" = lam.min)
     
-    class(fit) <- "EIVMR"
+    class(fit) <- "MCMVR"
     return(fit)
 }
 
@@ -551,8 +551,8 @@ MCMVR.coef <- function(fit, lambda = NULL, tau = NULL){
   } 
   
   
-  if(class(fit)!="EIVMR"){
-    stop('fit needs to be of class EIVMR (obtained using EIVMR.cv)')
+  if(class(fit)!="MCMVR"){
+    stop('fit needs to be of class MCMVR (obtained using MCMVR.cv)')
   }
   
   tau.ind <- which(fit$tau.vec == tau)
@@ -581,8 +581,8 @@ MCMVR.predict <- function(Xnew, fit, lambda = NULL, tau = NULL){
   } 
   
   
-  if(class(fit)!="EIVMR"){
-    stop('fit needs to be of class EIVMR (obtained using EIVMR.cv)')
+  if(class(fit)!="MCMVR"){
+    stop('fit needs to be of class MCMVR (obtained using MCMVR.cv)')
   }
   
   tau.ind <- which(fit$tau.vec == tau)
