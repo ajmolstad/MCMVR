@@ -10,12 +10,12 @@ output:
 ```{r setup, include=FALSE}
 library(Rcpp)
 library(RcppArmadillo)
-source("~/Dropbox/GitHub/MCMVR/R/MCMVR.R")
-sourceCpp("~/Dropbox/GitHub/MCMVR/src/MCnegloglikCpp.cpp")
+source("~/Documents/GitHub/MCMVR/R/MCMVR.R")
+sourceCpp("~/Documents/GitHub/MCMVR/src/MCnegloglikCpp.cpp")
 ```
 
 
-In this document, we provide a short tutorial on how to use the \texttt{MCMVR} R package. We download this package from GitHub. 
+In this document, we provide a short tutorial on how to use the $\texttt{MCMVR}$ R package. We download this package from GitHub. 
 ```{r githubDL, eval=FALSE}
 install.packages("devtools")
 library(devtools)
@@ -23,7 +23,7 @@ devtools::install_github("ajmolstad/MCMVR")
 library(MCMVR)
 ```
 
-First, we generate data from the ``errors-in-variables'' data generating model described in Section 3.1 of the article. 
+First, we generate data from the "errors-in-variables" data generating model described in Section 3.1 of the article. 
 ```{r generate data, tidy=TRUE}
 set.seed(1)
 p <- 50
@@ -89,7 +89,8 @@ image(beta!=0, col=grey(100:0/100), main=paste("Nonzero entries of truth"))
 ```
 
 
-We now also fit the model for the nuclear norm penalized version. Note that it is sometimes useful to relax the convergence tolerance for this version. We also turn off the $\texttt{quiet}$ option. Note that $\texttt{inner.quiet}$ should only be used for determining an appropriate value of $\texttt{tol}$. 
+We now also fit the model for the nuclear norm penalized version. Note that it is sometimes useful to relax the convergence tolerance for this version. We also turn off the $\texttt{quiet}$ option. When $\texttt{penalty = "NN"}$, this option prints the value of the nuclear norm evaluated at the estimate; when $\texttt{penalty = "L1"}$, this option prints the number of nonzero entries in the estimate of $\beta_*$. Note that $\texttt{inner.quiet = FALSE}$ should only be used for determining an appropriate value of $\texttt{tol}$. 
+
 ```{r generate RR data, tidy=TRUE}
 # ---------------------------------------------------
 # Perform 5-fold CV for a grid of tuning parameters 

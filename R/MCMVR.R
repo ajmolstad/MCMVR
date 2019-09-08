@@ -450,13 +450,13 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, nfolds = NULL,
 
           if(penalty=="NN"){
             if(!quiet){
-              cat(jj, kk, "; Nuclear norm = ", sum(svd2(beta.old)$d) , "\n")
+              cat("tau =", tau.vec[jj],": lambda =",  lambda.vec[kk], ": nuclear norm =", sum(svd2(beta.old)$d) , "\n")
             }
           }
             
           if(penalty=="L1"){
             if(!quiet){
-              cat(jj, kk, "; Nonzero entries =", sum(beta.old!=0),"\n")
+              cat("tau =", tau.vec[jj],": lambda =",  lambda.vec[kk], ": nonzero entries =", sum(beta.old!=0),"\n")
             }
           }
       }
