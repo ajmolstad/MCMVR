@@ -15,7 +15,7 @@ sourceCpp("~/Documents/GitHub/MCMVR/src/MCnegloglikCpp.cpp")
 ```
 
 
-In this document, we provide a short tutorial on how to use the $\texttt{MCMVR}$ R package. **If you encounter any errors or strange behavior, please report the issue at http://github.com/ajmolstad/MCMVR.** We download this package from GitHub. 
+In this document, we provide a short tutorial on how to use the $\texttt{MCMVR}$ R package. **If you encounter any errors or strange behavior, please report the issue at <github.com/ajmolstad/MCMVR>.** We download this package from GitHub. 
 ```{r githubDL, eval=FALSE}
 install.packages("devtools")
 library(devtools)
