@@ -389,7 +389,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
 
 
 # -- Cross-validation for tau and lambda grid (initialize at lasso solution)
-MCMVR.cv <- function(X, Y, tau.vec, nlambda, nfolds = NULL, 
+MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL, 
   delta = .01, tol = 1e-8, quiet= TRUE, inner.quiet= TRUE, penalty="L1"){
     
     # ---- assign algorithm based on penalty
@@ -419,16 +419,18 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, nfolds = NULL,
     D <- diag(1, p)
     
     # ---- select tuning parameters for lambda 
-    lambda.vec <- rep(0, length=nlambda)
-    if(penalty=="L1"){
-      lambda.max <- 2*(dim(x)[1]^(-1))*max(abs(xty)) + 1e-6
-    }
-    if(penalty=="NN"){
-      lambda.max <- 2*(dim(x)[1]^(-1))*max(svd2(xty)$d) + 1e-6
-    }
-    lambda.min <- delta*lambda.max
-    for(kk in 1:nlambda){
-      lambda.vec[kk] <- lambda.max^((nlambda-kk)/(nlambda-1))*lambda.min^((kk-1)/(nlambda-1))
+    if(is.null(lambda.vec)){
+      lambda.vec <- rep(0, length=nlambda)
+      if(penalty=="L1"){
+        lambda.max <- 2*(dim(x)[1]^(-1))*max(abs(xty)) + 1e-6
+      }
+      if(penalty=="NN"){
+        lambda.max <- 2*(dim(x)[1]^(-1))*max(svd2(xty)$d) + 1e-6
+      }
+      lambda.min <- delta*lambda.max
+      for(kk in 1:nlambda){
+        lambda.vec[kk] <- lambda.max^((nlambda-kk)/(nlambda-1))*lambda.min^((kk-1)/(nlambda-1))
+      }
     }
     
     # --- for each lambda, initialize largest tau value at the lasso solution ------
