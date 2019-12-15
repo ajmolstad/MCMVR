@@ -47,7 +47,7 @@ $$ \arg \min_{\beta \in \mathbb{R}^{p \times q}} \left\{ {\rm tr}\left[n^{-1}(Y 
 Another important argument is $\texttt{nfolds}$. If set to NULL, cross-validation is not performed, the model is fit to the complete data without cross-validation. 
 Finally, a user must also decide which penalty to use. The current options are $\texttt{penalty="L1"}$ and $\texttt{penalty="NN"}$ which set ${\rm Pen}(\beta) = \sum_{j,k}|\beta_{j,k}|$ and ${\rm Pen}(\beta) = \sum_{j=1}^{\min (p,q)} \varphi_j(\beta)$, respectively, where $\varphi_j(\beta)$ is the $j$th largest singular value of $\beta$. Note that one only needs to input the number of candidate $\lambda$, $\texttt{nlambda}$, and the ratio of max to min lambda $\texttt{delta}$. 
 ```{r fit model}
-# ---------------------------------------------------
+# ---------------------------------------------------  
 # Perform 5-fold CV for a grid of tuning parameters 
 # ---------------------------------------------------
 tau.vec <- 10^seq(3, 0, by=-.5)
