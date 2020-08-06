@@ -1,6 +1,12 @@
-# --------------------------------------------------------
-# Please contact amolstad@fredhutch.org with issues  
-# --------------------------------------------------------
+# ------------------------------------------------------------
+# 
+# Please contact amolstad@ufl.edu for citation instructions
+#
+# -----------------------------------------------------------
+
+# ----------------------------------------------
+# Fast trace functions for tr(x'x) and tr(y'x)
+# ----------------------------------------------
 tr.op1 <- function(x){
   sum(x^2)
 }
@@ -9,32 +15,37 @@ tr.op2 <- function(x,y){
   sum(y*x)
 }
 
-svd2 <- function(x, nu = min(n, p), nv = min(n, p), LINPACK = TRUE)
-{
-  #print("LINPACK:"); print(LINPACK)  ## added so you can see it's changed
+# ----------------------------------------------
+# Stable SVD
+# ----------------------------------------------
+svd2 <- function(x, nu = min(n, p), nv = min(n, p), LINPACK = TRUE){
   x <- as.matrix(x)
   if (any(!is.finite(x)))
     stop("infinite or missing values in 'x'")
   dx <- dim(x)
   n <- dx[1L]
   p <- dx[2L]
-  if (!n || !p)
+  if(!n || !p){
     stop("a dimension is zero")
-  La.res <- La.svd(x, nu, nv)   ## your problem line
-  res <- list(d = La.res$d)
-  if (nu)
-    res$u <- La.res$u
-  if (nv) {
-    if (is.complex(x))
-      res$v <- Conj(t(La.res$vt))
-    else res$v <- t(La.res$vt)
   }
-  res
+  La.res <- La.svd(x, nu, nv) 
+  res <- list(d = La.res$d)
+  if(nu){
+    res$u <- La.res$u
+  }
+  if(nv){
+    if(is.complex(x)){
+      res$v <- Conj(t(La.res$vt))
+    } else {
+      res$v <- t(La.res$vt)
+    }
+  }
+  reuturn(res)
 }
 
 
 # ----------------------------------------------------
-# inner iteration function for nuclear norm penalty 
+# Inner iteration function for nuclear norm penalty 
 # ---------------------------------------------------
 Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.quiet = TRUE, epsilon.beta = 1e-8, max.iter.inner = 2e4){
   
@@ -50,18 +61,24 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     return(sum(svd2(input)$d))
   }
 
-
-  # -- set backtrack parameter and compute initial obj.func val
+  # ---------------------------------------------------------------
+  # set backtrack parameter and compute initial obj.func val
+  # -------------------------------------------------------------
   Dinner <-  rep(1, dim(y)[2])%*%t(diag(D))
   gam <- 10
   rho <- 1e-8
   old <- MCnegloglikCpp(beta = beta.old, x = x, y = y, tau = tau, d = Dinner)
   loglik <- rep(0, max.iter.inner)
   loglik[1] <- old + lambda*pen(beta.old, weight)
-  # -- orig is obj function at initial value 
+  
+  # ----------------------------------------------------
+  # orig is obj function at initial value 
+  # ----------------------------------------------------
   orig <- abs(loglik[1])
   
-  # -- preliminaries for iteration 
+  # ----------------------------------------------------
+  # preliminaries for iteration 
+  # ----------------------------------------------------
   iterating <- TRUE
   beta.iter <- 1 
   alphakm1 <- 0
@@ -82,7 +99,6 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # ------------------------------------------
     if(beta.iter > 1){
       
-      # ----------------
       sk <- tildebetak - gammakm1; rk <- MCgradbetaCpp(beta = tildebetak, x = x, y = y, xtx = xtx, xty = xty, tau = tau, d = Dinner) - temp.gamma
       tx <- pmax(abs(tr.op1(sk)/tr.op2(sk, rk)), abs(tr.op2(sk, rk)/tr.op1(rk)))
       sk <- thetak - betakm1; rk <- MCgradbetaCpp(beta = thetak, x = x, y = y, xtx = xtx, xty = xty, tau = tau, d = Dinner) - temp.beta
@@ -92,11 +108,9 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
         tx <- 1; ty <- 1
       }
       
-      } else {
-      
-       tx <- 1; ty <- 1
-      
-      }
+    } else {
+     tx <- 1; ty <- 1
+    }
     
     
     # ------------------------------------------
@@ -106,10 +120,14 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     old.F <- MCnegloglikCpp(beta = gammak, x = x, y = y, tau = tau, d = Dinner) + lambda*sum(svd2(gammak)$d)
     updating <- TRUE
     
-    # --- backtracking line search 
+    # ---------------------------------------------
+    # run backtracking line search 
+    # ---------------------------------------------
     while(updating){
       
-      # -- new iterate proximal step
+      # --------------------------------------------
+      # new iterate proximal step
+      # --------------------------------------------
       upTemp <- prox(gammak - ty*temp.gamma, ty*lambda)
       tildebetakp1 <- upTemp$out
       up.F.tildebeta <- MCnegloglikCpp(beta = tildebetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*sum(upTemp$d)#pen(tildebetakp1, weight, gamma = alpha)
@@ -123,6 +141,7 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
       if(ty < 1e-8){
         updating <- FALSE
       }
+      
     }
     
     # ------------------------------------------
@@ -132,10 +151,14 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     old.F <- MCnegloglikCpp(beta = betak, x = x, y = y, tau = tau, d = Dinner) + lambda*pen(betak, weight)
     updating <- TRUE
     
-    # --- backtracking line search 
+    # --------------------------------------------
+    # backtracking line search 
+    # ---------------------------------------------
     while(updating){
       
-      # -- new iterate proximal step
+      # --------------------------------------------
+      # new iterate proximal step
+      # --------------------------------------------
       upTemp <- prox(betak - tx*temp.beta, tx*lambda)
       thetakp1 <- upTemp$out
       up.F.theta <- MCnegloglikCpp(beta = thetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*sum(upTemp$d)#pen(thetakp1, weight, gamma = alpha)
@@ -203,12 +226,17 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     
   }
   
-  temp <- MCgradbetaCpp(beta = betak, x = x, y = y, xtx = xtx, xty = xty, tau = tau, d = Dinner)
+  
+  # -------------------------------------------
+  # For diagnostics, check optimality below
+  # -------------------------------------------
+  #temp <- MCgradbetaCpp(beta = betak, x = x, y = y, xtx = xtx, xty = xty, tau = tau, d = Dinner)
   #check1 <- sum((abs(tau*temp) <= tau*alpha*weight*lambda)[which(betak == 0)])/sum(betak == 0)
   #check2 <- max(abs((temp + alpha*weight*lambda*sign(betak) - (1-alpha)*lambda*betak)[which(betak != 0)]))
   
   return(list("beta" = betak, "objfunc" = loglik[1:(beta.iter - 2)], "check1" = sum(svd2(betak)$d > 1e-8)))#, "check2" = check2))
 }
+
 
 # ----------------------------------------------------
 # inner iteration function for lasso penalty 
@@ -226,8 +254,9 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     return(sum(abs(input)))
   }
 
-
-  # -- set backtrack parameter and compute initial obj.func val
+  # -----------------------------------------------------------
+  # set backtrack parameter and compute initial obj.func val
+  # -----------------------------------------------------------
   Dinner <-  rep(1, dim(y)[2])%*%t(diag(D))
   gam <- 10
   rho <- 1e-8
@@ -236,8 +265,10 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
   loglik[1] <- old + lambda*pen(beta.old, weight)
   # -- orig is obj function at initial value 
   orig <- abs(loglik[1])
-  
-  # -- preliminaries for iteration 
+
+  # -----------------------------------------------------------  
+  # preliminaries for iteration 
+  # -----------------------------------------------------------
   iterating <- TRUE
   beta.iter <- 1 
   alphakm1 <- 0
@@ -268,11 +299,9 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
         tx <- 1; ty <- 1
       }
       
-      } else {
-      
-       tx <- 1; ty <- 1
-      
-      }
+    } else {
+     tx <- 1; ty <- 1
+    }
     
     
     # ------------------------------------------
@@ -282,10 +311,14 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     old.F <- MCnegloglikCpp(beta = gammak, x = x, y = y, tau = tau, d = Dinner) + lambda*pen(gammak, weight)
     updating <- TRUE
     
-    # --- backtracking line search 
+    # -----------------------------------------------------------
+    # backtracking line search 
+    # -----------------------------------------------------------
     while(updating){
       
-      # -- new iterate proximal step
+      # -----------------------------------------------------------
+      # new iterate proximal step
+      # -----------------------------------------------------------
       upTemp <- prox(gammak - ty*temp.gamma, ty*lambda)
       tildebetakp1 <- upTemp$out
       up.F.tildebeta <- MCnegloglikCpp(beta = tildebetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*pen(tildebetakp1, weight)#pen(tildebetakp1, weight, gamma = alpha)
@@ -309,10 +342,14 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     old.F <- MCnegloglikCpp(beta = betak, x = x, y = y, tau = tau, d = Dinner) + lambda*pen(betak, weight)
     updating <- TRUE
     
-    # --- backtracking line search 
+    # -----------------------------------------------------------
+    # backtracking line search 
+    # -----------------------------------------------------------
     while(updating){
       
-      # -- new iterate proximal step
+      # -----------------------------------------------------------
+      # new iterate proximal step
+      # -----------------------------------------------------------
       upTemp <- prox(betak - tx*temp.beta, tx*lambda)
       thetakp1 <- upTemp$out
       up.F.theta <- MCnegloglikCpp(beta = thetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*pen(thetakp1, weight)#pen(thetakp1, weight, gamma = alpha)
@@ -380,11 +417,15 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     
   }
   
-  temp <- MCgradbetaCpp(beta = betak, x = x, y = y, xtx = xtx, xty= xty, tau = tau, d = Dinner)
-  check1 <- NULL#sum((abs(tau*temp) <= tau*alpha*weight*lambda)[which(betak == 0)])/sum(betak == 0)
-  check2 <- NULL#max(abs((temp + alpha*weight*lambda*sign(betak) - (1-alpha)*lambda*betak)[which(betak != 0)]))
+  # ------------------------------------------------------------
+  # Check optimality
+  # -------------------------------------------------------------
+  # temp <- MCgradbetaCpp(beta = betak, x = x, y = y, xtx = xtx, xty= xty, tau = tau, d = Dinner)
+  # check1 <- sum((abs(tau*temp) <= tau*alpha*weight*lambda)[which(betak == 0)])/sum(betak == 0)
+  # check2 <- max(abs((temp + alpha*weight*lambda*sign(betak) - (1-alpha)*lambda*betak)[which(betak != 0)]))
   
-  return(list("beta" = betak, "objfunc" = loglik[1:(beta.iter - 2)], "check1" = check1, "check2" = check2))
+  return(list("beta" = betak, "objfunc" = loglik[1:(beta.iter - 2)]#, "check1" = check1, "check2" = check2
+              ))
 }
 
 
