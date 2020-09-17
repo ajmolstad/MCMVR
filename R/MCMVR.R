@@ -7,34 +7,34 @@
 # ----------------------------------------------
 # Fast trace functions for tr(x'x) and tr(y'x)
 # ----------------------------------------------
-tr.op1 <- function(x){
+tr.op1 <- function(x) {
   sum(x^2)
 }
 
-tr.op2 <- function(x,y){
+tr.op2 <- function(x,y) {
   sum(y*x)
 }
 
 # ----------------------------------------------
 # Stable SVD
 # ----------------------------------------------
-svd2 <- function(x, nu = min(n, p), nv = min(n, p), LINPACK = TRUE){
+svd2 <- function(x, nu = min(n, p), nv = min(n, p), LINPACK = TRUE) {
   x <- as.matrix(x)
   if (any(!is.finite(x)))
     stop("infinite or missing values in 'x'")
   dx <- dim(x)
   n <- dx[1L]
   p <- dx[2L]
-  if(!n || !p){
+  if (!n || !p) {
     stop("a dimension is zero")
   }
   La.res <- La.svd(x, nu, nv) 
   res <- list(d = La.res$d)
-  if(nu){
+  if (nu) {
     res$u <- La.res$u
   }
-  if(nv){
-    if(is.complex(x)){
+  if (nv) {
+    if (is.complex(x)) {
       res$v <- Conj(t(La.res$vt))
     } else {
       res$v <- t(La.res$vt)
@@ -47,17 +47,17 @@ svd2 <- function(x, nu = min(n, p), nv = min(n, p), LINPACK = TRUE){
 # ----------------------------------------------------
 # Inner iteration function for nuclear norm penalty 
 # ---------------------------------------------------
-Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.quiet = TRUE, epsilon.beta = 1e-8, max.iter.inner = 2e4){
+Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.quiet = TRUE, epsilon.beta = 1e-8, max.iter.inner = 2e4) {
   
   # ---------------------------------
   # Nuclear norm specific functions 
   # ---------------------------------
-  prox <- function(input, tau){
+  prox <- function(input, tau) {
     keep <- svd2(input)
     return(list("out" = tcrossprod(keep$u*(tcrossprod(rep(1, dim(keep$u)[1]),pmax(keep$d - tau, 0))),keep$v), "d" = pmax(keep$d - tau, 0)))
   }
 
-  pen <- function(input, weight){
+  pen <- function(input, weight) {
     return(sum(svd2(input)$d))
   }
 
@@ -87,7 +87,7 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
   betakm1 <- beta.old
   tildebetak <- beta.old 
   
-  while(iterating){
+  while (iterating) {
     
     # ------------------------------------------
     # extrapolation step -- compute gradient and obj.func value 
@@ -97,14 +97,14 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # ------------------------------------------
     # get BB step sizes 
     # ------------------------------------------
-    if(beta.iter > 1){
+    if (beta.iter > 1) {
       
       sk <- tildebetak - gammakm1; rk <- MCgradbetaCpp(beta = tildebetak, x = x, y = y, xtx = xtx, xty = xty, tau = tau, d = Dinner) - temp.gamma
       tx <- pmax(abs(tr.op1(sk)/tr.op2(sk, rk)), abs(tr.op2(sk, rk)/tr.op1(rk)))
       sk <- thetak - betakm1; rk <- MCgradbetaCpp(beta = thetak, x = x, y = y, xtx = xtx, xty = xty, tau = tau, d = Dinner) - temp.beta
       ty <- pmax(abs(tr.op1(sk)/tr.op2(sk, rk)), abs(tr.op2(sk, rk)/tr.op1(rk)))
       
-      if(is.na(ty) | is.na(tx) | ty == 0 | tx == 0 | ty == Inf | tx == Inf | ty == -Inf | tx == -Inf){
+      if (is.na(ty) | is.na(tx) | ty == 0 | tx == 0 | ty == Inf | tx == Inf | ty == -Inf | tx == -Inf) {
         tx <- 1; ty <- 1
       }
       
@@ -123,7 +123,7 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # ---------------------------------------------
     # run backtracking line search 
     # ---------------------------------------------
-    while(updating){
+    while (updating) {
       
       # --------------------------------------------
       # new iterate proximal step
@@ -132,13 +132,13 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
       tildebetakp1 <- upTemp$out
       up.F.tildebeta <- MCnegloglikCpp(beta = tildebetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*sum(upTemp$d)#pen(tildebetakp1, weight, gamma = alpha)
       
-      if(up.F.tildebeta < old.F - rho*sum((tildebetakp1 - gammak)^2)){
+      if (up.F.tildebeta < old.F - rho*sum((tildebetakp1 - gammak)^2)) {
         updating <- FALSE
       } else {
         ty <- ty/gam
       }
       
-      if(ty < 1e-8){
+      if (ty < 1e-8) {
         updating <- FALSE
       }
       
@@ -154,7 +154,7 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # --------------------------------------------
     # backtracking line search 
     # ---------------------------------------------
-    while(updating){
+    while (updating) {
       
       # --------------------------------------------
       # new iterate proximal step
@@ -164,13 +164,13 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
       up.F.theta <- MCnegloglikCpp(beta = thetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*sum(upTemp$d)#pen(thetakp1, weight, gamma = alpha)
       inner <- (up.F.theta < old.F - rho*sum((thetakp1 - betak)^2))
 
-      if(inner){
+      if (inner) {
         updating <- FALSE
       } else {
         tx <- tx/gam
       }
       
-      if(tx < 1e-8){
+      if (tx < 1e-8) {
         updating <- FALSE
       }
     }
@@ -184,7 +184,7 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # --------------------------------------
     # update beta
     # --------------------------------------
-    if(up.F.tildebeta <= up.F.theta){
+    if (up.F.tildebeta <= up.F.theta) {
         betakp1 <- tildebetakp1
        loglik[beta.iter+1] <-up.F.tildebeta
     } else {
@@ -197,13 +197,13 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # --------------------------------------
     #loglik[beta.iter+1] <- MCnegloglikCpp(betakp1, x, y, tau, Dinner) + lambda*pen(betakp1, weight, gamma = alpha)
 
-    if(beta.iter > 3){
-      if(abs(loglik[beta.iter-1] - loglik[beta.iter+1])/orig < epsilon.beta){
+    if (beta.iter > 3) {
+      if (abs(loglik[beta.iter-1] - loglik[beta.iter+1])/orig < epsilon.beta) {
           iterating <- FALSE
       }
     }
     
-    if(!inner.quiet){
+    if (!inner.quiet) {
       cat(loglik[beta.iter+1], "\n")
     }
     
@@ -220,7 +220,7 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     gammakm1 <- gammak
     beta.iter <- beta.iter + 1
     
-    if(beta.iter > max.iter.inner){
+    if (beta.iter > max.iter.inner) {
       iterating = FALSE
     }
     
@@ -241,16 +241,16 @@ Acc.Prox.NN <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
 # ----------------------------------------------------
 # inner iteration function for lasso penalty 
 # ---------------------------------------------------
-Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.quiet = TRUE, epsilon.beta = 1e-8, max.iter.inner = 2e4){
+Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.quiet = TRUE, epsilon.beta = 1e-8, max.iter.inner = 2e4) {
   
   # ---------------------------------
   # Nuclear norm specific functions 
   # ---------------------------------
-  prox <- function(input, tau){
+  prox <- function(input, tau) {
     return(list("out" = pmax(abs(input) - tau, 0)*sign(input)))
   }
 
-  pen <- function(input, weight){
+  pen <- function(input, weight) {
     return(sum(abs(input)))
   }
 
@@ -277,7 +277,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
   betakm1 <- beta.old
   tildebetak <- beta.old 
   
-  while(iterating){
+  while (iterating) {
     
     # ------------------------------------------
     # extrapolation step -- compute gradient and obj.func value 
@@ -287,7 +287,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # ------------------------------------------
     # get BB step sizes 
     # ------------------------------------------
-    if(beta.iter > 1){
+    if (beta.iter > 1) {
       
       # ----------------
       sk <- tildebetak - gammakm1; rk <- MCgradbetaCpp(beta= tildebetak, x = x, y=y, xtx= xtx, xty = xty, tau = tau, d = Dinner) - temp.gamma
@@ -295,7 +295,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
       sk <- thetak - betakm1; rk <- MCgradbetaCpp(beta= thetak, x = x, y = y, xtx = xtx, xty = xty, tau = tau, d = Dinner) - temp.beta
       ty <- pmax(abs(tr.op1(sk)/tr.op2(sk, rk)), abs(tr.op2(sk, rk)/tr.op1(rk)))
       
-      if(is.na(ty) | is.na(tx) | ty == 0 | tx == 0 | ty == Inf | tx == Inf | ty == -Inf | tx == -Inf){
+      if (is.na(ty) | is.na(tx) | ty == 0 | tx == 0 | ty == Inf | tx == Inf | ty == -Inf | tx == -Inf) {
         tx <- 1; ty <- 1
       }
       
@@ -314,7 +314,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # -----------------------------------------------------------
     # backtracking line search 
     # -----------------------------------------------------------
-    while(updating){
+    while (updating) {
       
       # -----------------------------------------------------------
       # new iterate proximal step
@@ -323,13 +323,13 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
       tildebetakp1 <- upTemp$out
       up.F.tildebeta <- MCnegloglikCpp(beta = tildebetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*pen(tildebetakp1, weight)#pen(tildebetakp1, weight, gamma = alpha)
       
-      if(up.F.tildebeta < old.F - rho*sum((tildebetakp1 - gammak)^2)){
+      if (up.F.tildebeta < old.F - rho*sum((tildebetakp1 - gammak)^2)) {
         updating <- FALSE
       } else {
         ty <- ty/gam
       }
       
-      if(ty < 1e-10){
+      if (ty < 1e-10) {
         updating <- FALSE
       }
     }
@@ -345,7 +345,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # -----------------------------------------------------------
     # backtracking line search 
     # -----------------------------------------------------------
-    while(updating){
+    while (updating) {
       
       # -----------------------------------------------------------
       # new iterate proximal step
@@ -355,13 +355,13 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
       up.F.theta <- MCnegloglikCpp(beta = thetakp1, x = x, y = y, tau = tau, d = Dinner) + lambda*pen(thetakp1, weight)#pen(thetakp1, weight, gamma = alpha)
       inner <- (up.F.theta < old.F - rho*sum((thetakp1 - betak)^2))
 
-      if(inner){
+      if (inner) {
         updating <- FALSE
       } else {
         tx <- tx/gam
       }
       
-      if(tx < 1e-10){
+      if (tx < 1e-10) {
         updating <- FALSE
       }
     }
@@ -375,7 +375,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # --------------------------------------
     # update beta
     # --------------------------------------
-    if(up.F.tildebeta <= up.F.theta){
+    if (up.F.tildebeta <= up.F.theta) {
         betakp1 <- tildebetakp1
        loglik[beta.iter+1] <-up.F.tildebeta
     } else {
@@ -388,13 +388,13 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     # --------------------------------------
     #loglik[beta.iter+1] <- MCnegloglikCpp(betakp1, x, y, tau, Dinner) + lambda*pen(betakp1, weight, gamma = alpha)
 
-    if(beta.iter > 3){
-      if(abs(loglik[beta.iter-1] - loglik[beta.iter+1])/orig < epsilon.beta){
+    if (beta.iter > 3) {
+      if (abs(loglik[beta.iter-1] - loglik[beta.iter+1])/orig < epsilon.beta) {
           iterating <- FALSE
       }
     }
     
-    if(!inner.quiet){
+    if (!inner.quiet) {
       cat(loglik[beta.iter+1], "\n")
     }
     
@@ -411,7 +411,7 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
     gammakm1 <- gammak
     beta.iter <- beta.iter + 1
     
-    if(beta.iter > max.iter.inner){
+    if (beta.iter > max.iter.inner) {
       iterating = FALSE
     }
     
@@ -431,17 +431,17 @@ Acc.Prox.L1 <- function(x, y, xtx, xty, D, beta.old, tau, lambda, weight, inner.
 
 # -- Cross-validation for tau and lambda grid (initialize at lasso solution)
 MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL, 
-  delta = .01, tol = 1e-8, quiet= TRUE, inner.quiet= TRUE, penalty="L1"){
+  delta = .01, tol = 1e-8, quiet= TRUE, inner.quiet= TRUE, penalty="L1") {
     
     # ---- assign algorithm based on penalty
-    if(penalty=="L1"){
+    if (penalty=="L1") {
       Acc.Prox <- Acc.Prox.L1
     } 
-    if(penalty=="NN"){
+    if (penalty=="NN") {
       Acc.Prox <- Acc.Prox.NN
     }
 
-    if(penalty!="L1" & penalty!="NN"){
+    if (penalty!="L1" & penalty!="NN") {
       stop("penalty argument must be \"NN\" or \"L1\" ")
     }
 
@@ -460,16 +460,16 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
     D <- diag(1, p)
     
     # ---- select tuning parameters for lambda 
-    if(is.null(lambda.vec)){
+    if (is.null(lambda.vec)) {
       lambda.vec <- rep(0, length=nlambda)
-      if(penalty=="L1"){
+      if (penalty=="L1") {
         lambda.max <- 2*(dim(x)[1]^(-1))*max(abs(xty)) + 1e-6
       }
-      if(penalty=="NN"){
+      if (penalty=="NN") {
         lambda.max <- 2*(dim(x)[1]^(-1))*max(svd2(xty)$d) + 1e-6
       }
       lambda.min <- delta*lambda.max
-      for(kk in 1:nlambda){
+      for (kk in 1:nlambda) {
         lambda.vec[kk] <- lambda.max^((nlambda-kk)/(nlambda-1))*lambda.min^((kk-1)/(nlambda-1))
       }
     }
@@ -480,9 +480,9 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
     beta.old <- matrix(0, nrow=p, ncol=q)
     beta.temp <- beta.old
 
-    for(jj in 1:length(tau.vec)){
+    for (jj in 1:length(tau.vec)) {
       beta.old <- matrix(0, nrow=p, ncol=q)
-      for(kk in 1:length(lambda.vec)){
+      for (kk in 1:length(lambda.vec)) {
 
             temp <- Acc.Prox(x, y, xtx, xty, D,beta.old, tau.vec[jj], lambda.vec[kk]/tau.vec[jj], 
                                 weight = weight, inner.quiet = inner.quiet, 
@@ -491,21 +491,21 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
             beta.full[(p*q*(jj-1)+1):(p*q*jj),kk] <- c(beta.old)
             sparsity.mat[kk,jj] <- sum(beta.old!=0)
 
-          if(penalty=="NN"){
-            if(!quiet){
+          if (penalty=="NN") {
+            if (!quiet) {
               cat("tau =", tau.vec[jj],": lambda =",  lambda.vec[kk], ": nuclear norm =", sum(svd2(beta.old)$d) , "\n")
             }
           }
             
-          if(penalty=="L1"){
-            if(!quiet){
+          if (penalty=="L1") {
+            if (!quiet) {
               cat("tau =", tau.vec[jj],": lambda =",  lambda.vec[kk], ": nonzero entries =", sum(beta.old!=0),"\n")
             }
           }
       }
     }
     
-    if(!is.null(nfolds)){
+    if (!is.null(nfolds)) {
       
       # --- perform cross validation
       fold <- sample(rep(1:nfolds, length=n))
@@ -513,7 +513,7 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
       errs_wpred <- array(Inf, dim=c(length(lambda.vec),length(tau.vec), nfolds))
       errs_pred <- array(Inf, dim=c(length(lambda.vec),length(tau.vec), nfolds))
       
-      for(k in 1:nfolds){
+      for (k in 1:nfolds) {
         
         # --- center X and Y --------------------
         ntrain <- dim(X[-cv.index[[k]],])[1]
@@ -527,14 +527,14 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
         x.test <- (X[cv.index[[k]], ] - rep(1, n.test)%*%t(apply(X[-cv.index[[k]],], 2, mean)))#/(rep(1, n.test)%*%t(apply(X[-cv.index[[k]], ], 2, sd)))
         y.test <- (Y[cv.index[[k]], ] - rep(1, n.test)%*%t(apply(Y[-cv.index[[k]],], 2, mean)))#/(rep(1, n.test)%*%t(apply(Y[-cv.index[[k]], ], 2, sd)))
         weight <- matrix(1, nrow=p, ncol=q)
-        # if(weighted){
+        # if (weighted) {
         #   weight <- rep(1, p)%*%t(1/apply(y.test, 2, sd))
         #   #weight <- weight/max(weight)
         # }
         # ------------------------------------------------
-        for(jj in 1:length(tau.vec)){
+        for (jj in 1:length(tau.vec)) {
           beta.old <- matrix(0, nrow=p, ncol=q)
-          for(kk in 1:length(lambda.vec)){
+          for (kk in 1:length(lambda.vec)) {
             temp <- Acc.Prox(x.inner, y.inner, xtx.inner, xty.inner, D, 
               beta.old, tau.vec[jj], lambda.vec[kk]/tau.vec[jj], weight = weight, 
               inner.quiet = inner.quiet, epsilon.beta = tol*tau.vec[jj], max.iter.inner = 1e5)
@@ -546,7 +546,7 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
              beta.old <- temp$beta
           }
         }
-        if(!quiet){
+        if (!quiet) {
           cat("Through CV fold", k, "\n")
         }
       }
@@ -557,7 +557,7 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
     }
 
     
-    if(!is.null(errs_pred)){
+    if (!is.null(errs_pred)) {
       inds <- which(apply(errs_pred, c(1,2), mean) == min(apply(errs_pred, c(1,2), mean)), arr.ind = TRUE)
       tau.min <- tau.vec[inds[1,2]]
       lam.min <- lambda.vec[inds[1,1]]
@@ -583,18 +583,18 @@ MCMVR.cv <- function(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
 
 
 
-MCMVR.coef <- function(fit, lambda = NULL, tau = NULL){
+MCMVR.coef <- function(fit, lambda = NULL, tau = NULL) {
   
-  if(is.null(lambda) && is.null(tau)){
+  if (is.null(lambda) && is.null(tau)) {
     tau <- fit$tau.min
     lambda <- fit$lam.min
-    if(is.null(fit$tau.min)){
+    if (is.null(fit$tau.min)) {
       stop('No tuning parameters selected by CV')
     }
   } 
   
   
-  if(class(fit)!="MCMVR"){
+  if (class(fit)!="MCMVR") {
     stop('fit needs to be of class MCMVR (obtained using MCMVR.cv)')
   }
   
@@ -613,18 +613,18 @@ MCMVR.coef <- function(fit, lambda = NULL, tau = NULL){
 
 
 
-MCMVR.predict <- function(Xnew, fit, lambda = NULL, tau = NULL){
+MCMVR.predict <- function(Xnew, fit, lambda = NULL, tau = NULL) {
   
-  if(is.null(lambda) && is.null(tau)){
+  if (is.null(lambda) && is.null(tau)) {
     tau <- fit$tau.min
     lambda <- fit$lam.min
-    if(is.null(fit$tau.min)){
+    if (is.null(fit$tau.min)) {
       stop('No tuning parameters selected by CV')
     }
   } 
   
   
-  if(class(fit)!="MCMVR"){
+  if (class(fit)!="MCMVR") {
     stop('fit needs to be of class MCMVR (obtained using MCMVR.cv)')
   }
   
@@ -640,7 +640,7 @@ MCMVR.predict <- function(Xnew, fit, lambda = NULL, tau = NULL){
   B0 <- fit$Y.offset - crossprod(beta.mat, fit$X.offset)
 
   # ---- prediction 
-  if(dim(Xnew)[1] > 1){
+  if (dim(Xnew)[1] > 1) {
     preds <- rep(1, dim(Xnew)[1])%*%t(B0) + Xnew%*%beta.mat
   } else {
     preds <- B0 + crossprod(beta.mat, Xnew)
