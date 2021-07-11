@@ -40,7 +40,7 @@ svd2 <- function(x, nu = min(n, p), nv = min(n, p), LINPACK = TRUE) {
       res$v <- t(La.res$vt)
     }
   }
-  reuturn(res)
+  return(res)
 }
 
 
