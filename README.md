@@ -1,5 +1,5 @@
 # MCMVR
-An R package implementing the method proposed in [An explicit mean-covariance parameterization for multivariate response linear regression](https://www.tandfonline.com/doi/abs/10.1080/10618600.2020.1853551?casa_token=dQzCJAFc1ZoAAAAA%3AUaq0GRdBijyS7kavHT9njRKCFqCvnE-XBddXiI_w8BAEf0ZCllJVy_ALwrcXpGxSJSKcdS4i7P_q&journalCode=ucgs20). Please contact [amolstad@umn.edu](mailto:amolstad@umn.edu)] with any comments or questions. 
+An R package implementing the method proposed in [An explicit mean-covariance parameterization for multivariate response linear regression](https://www.tandfonline.com/doi/abs/10.1080/10618600.2020.1853551?casa_token=dQzCJAFc1ZoAAAAA%3AUaq0GRdBijyS7kavHT9njRKCFqCvnE-XBddXiI_w8BAEf0ZCllJVy_ALwrcXpGxSJSKcdS4i7P_q&journalCode=ucgs20). Please contact [amolstad@umn.edu](mailto:amolstad@umn.edu) with any comments or questions. 
 
 ### Installation
 MCMVR can be loaded directly into R through the the `devtools` package:
