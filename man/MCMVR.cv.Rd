@@ -13,7 +13,7 @@ MCMVR.cv(X, Y, tau.vec, nlambda, lambda.vec = NULL, nfolds = NULL,
 \item{nlambda}{The number of candidate tuning parameters \eqn{\lambda} to be used for model fitting and cross-validation. }
 \item{lambda.vec}{A user specified set of candidate tuning parameters: should not be utilized for general purpose model fitting. }
 \item{nfolds}{When \code{NULL}, does not perform cross-validation but fits the model for all combinations of \eqn{\tau} and \eqn{\lambda}}.
-\item{delta}{Scalar less than one which indicates the ratio between largest and smallest candidate \eqn{\lambda}. Default is .01. }.
+\item{delta}{Positive scalar less than one which indicates the ratio of smallest to large candidate \eqn{\lambda}. Default is .01. }.
 \item{tol}{Convergence tolerance for inner accelerate proximal gradient descent algorithm.}
 \item{quiet}{If \code{TRUE}, prints progress. }.
 \item{inner.quiet}{If \code{TRUE}, prints objective function values for inner functions. Should be rarely used unless to help determine an appropriate \code{tol}. }
