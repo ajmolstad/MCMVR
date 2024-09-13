@@ -594,9 +594,10 @@ MCMVR.coef <- function(fit, lambda = NULL, tau = NULL) {
   } 
   
   
-  if (class(fit)!="MCMVR") {
+  if (!inherits(fit, "MCMVR")) {
     stop('fit needs to be of class MCMVR (obtained using MCMVR.cv)')
   }
+
   
   tau.ind <- which(fit$tau.vec == tau)
   lam.ind <- which(fit$lambda.vec == lambda)
@@ -624,7 +625,7 @@ MCMVR.predict <- function(Xnew, fit, lambda = NULL, tau = NULL) {
   } 
   
   
-  if (class(fit)!="MCMVR") {
+  if (!inherits(fit, "MCMVR")) {
     stop('fit needs to be of class MCMVR (obtained using MCMVR.cv)')
   }
   
