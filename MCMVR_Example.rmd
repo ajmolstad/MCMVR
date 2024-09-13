@@ -8,18 +8,18 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-# library(Rcpp)
-# library(RcppArmadillo)
-# source("~/Documents/GitHub/MCMVR/R/MCMVR.R")
-# sourceCpp("~/Documents/GitHub/MCMVR/src/MCnegloglikCpp.cpp")
+library(Rcpp)
+library(RcppArmadillo)
+source("~/Documents/GitHub/MCMVR/R/MCMVR.R")
+sourceCpp("~/Documents/GitHub/MCMVR/src/MCnegloglikCpp.cpp")
 ```
 
 
 In this document, we provide a short tutorial on how to use the $\texttt{MCMVR}$ R package. **If you encounter any errors or strange behavior, please report the issue at https://github.com/ajmolstad/MCMVR.** We start by downloading this package from GitHub. 
 ```{r githubDL, eval=FALSE}
-# install.packages("devtools")
-# library(devtools)
-# devtools::install_github("ajmolstad/MCMVR")
+install.packages("devtools")
+library(devtools)
+devtools::install_github("ajmolstad/MCMVR")
 library(MCMVR)
 ```
 

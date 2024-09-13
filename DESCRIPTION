@@ -12,6 +12,4 @@ LazyData: TRUE
 Imports: Rcpp (>= 0.12.1), Matrix
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
-VignetteBuilder: knitr
-Suggests: knitr, rmarkdown, lattice
 Packaged: 2018-08-29 19:33:45 UTC; aaronmolstad
